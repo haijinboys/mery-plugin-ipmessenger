@@ -14,11 +14,10 @@ uses
 {$IF CompilerVersion > 22.9}
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants,
   System.Classes, Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs,
-  Vcl.Menus, Vcl.StdCtrls, Vcl.ExtCtrls, Vcl.ImgList, Vcl.ComCtrls,
-  Winapi.CommCtrl;
+  Vcl.Menus, Vcl.ImgList, Vcl.StdCtrls, Vcl.ExtCtrls, Vcl.ComCtrls;
 {$ELSE}
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, Menus, StdCtrls, ExtCtrls, ImgList, ComCtrls, CommCtrl;
+  Dialogs, Menus, ImgList, StdCtrls, ExtCtrls, ComCtrls;
 {$IFEND}
 
 
@@ -43,6 +42,7 @@ type
     OutBoxPopupMenu: TPopupMenu;
     OutBoxOpenMenuItem: TMenuItem;
     OutBoxDeleteMenuItem: TMenuItem;
+    ImageList: TImageList;
     HostListView: TListView;
     Splitter: TSplitter;
     PageControl: TPageControl;
@@ -50,7 +50,6 @@ type
     OutBoxTabSheet: TTabSheet;
     InBoxListView: TListView;
     OutBoxListView: TListView;
-    ImageList: TImageList;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure FormShow(Sender: TObject);
