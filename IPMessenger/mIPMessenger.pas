@@ -20,7 +20,7 @@ uses
 
 resourcestring
   SName = 'IPメッセンジャー';
-  SVersion = '2.0.0';
+  SVersion = '2.0.2';
 
 type
   TIPMessengerFrame = class(TFrame)
@@ -70,9 +70,12 @@ begin
     Result := FForm.SetProperties
   else
   begin
-    with TMainForm.Create(nil) do
+    with TMainForm.CreateParented(Handle) do
       try
+        BarPos := FBarPos;
         Result := SetProperties;
+        if Result then
+          FBarPos := BarPos;
       finally
         Free;
       end;
@@ -102,7 +105,7 @@ begin
           end;
         end;
       end;
-      if ((Msg.wParam >= VK_PRIOR) and (Msg.wParam <= VK_DELETE)) or (Msg.wParam <= VK_TAB) or (Msg.wParam <= VK_BACK) or (Msg.wParam <= VK_ESCAPE) or (Msg.wParam <= VK_RETURN) then
+      if ((Msg.wParam >= VK_PRIOR) and (Msg.wParam <= VK_DELETE)) or (Msg.wParam = VK_TAB) or (Msg.wParam = VK_BACK) or (Msg.wParam = VK_ESCAPE) or (Msg.wParam = VK_RETURN) then
       begin
         SendMessage(GetFocus, Msg.message, Msg.wParam, Msg.lParam);
         Result := True;

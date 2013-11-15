@@ -158,7 +158,11 @@ procedure TMsgr.SetMyStatus(const Value: TStatus);
     UserSize: Cardinal;
   begin
     UserSize := Sizeof(UserChar) - 1;
+{$IF CompilerVersion > 22.9}
+    if Winapi.Windows.GetUserNameW(UserChar, UserSize) then
+{$ELSE}
     if Windows.GetUserNameW(UserChar, UserSize) then
+{$IFEND}
     begin
       UserChar[UserSize] := #0;
       Result := UserChar;

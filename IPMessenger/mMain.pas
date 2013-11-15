@@ -201,7 +201,7 @@ begin
     try
       Editor_GetSelStart(FEditor, POS_LOGICAL, @P1);
       Editor_GetSelEnd(FEditor, POS_LOGICAL, @P2);
-      Editor_ExecCommand(FEditor, MEID_EDIT_SELECT_ALL);
+      Editor_Convert(FEditor, FLAG_CONVERT_SELECT_ALL);
       Len := Editor_GetSelText(FEditor, 0, nil);
       if Len <= 1 then
         Exit;
@@ -357,7 +357,11 @@ procedure TMainForm.HostListViewData(Sender: TObject; Item: TListItem);
     UserSize: Cardinal;
   begin
     UserSize := Sizeof(UserChar) - 1;
+{$IF CompilerVersion > 22.9}
+    if Winapi.Windows.GetUserNameW(UserChar, UserSize) then
+{$ELSE}
     if Windows.GetUserNameW(UserChar, UserSize) then
+{$IFEND}
     begin
       UserChar[UserSize] := #0;
       Result := UserChar;
