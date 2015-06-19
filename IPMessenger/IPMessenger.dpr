@@ -11,19 +11,14 @@ library IPMessenger;
 {$RTTI EXPLICIT METHODS([]) FIELDS([]) PROPERTIES([])}
 {$WEAKLINKRTTI ON}
 
+{$R 'mPlugin.res' 'mPlugin.rc'}
+
 
 uses
-{$IF CompilerVersion > 22.9}
-  Winapi.Windows,
-  System.SysUtils,
-  System.Classes,
-  Vcl.Themes,
-{$ELSE}
   Windows,
   SysUtils,
   Classes,
   Themes,
-{$IFEND}
   mCommon in 'mCommon.pas',
   mMain in 'mMain.pas' {MainForm},
   mAlert in 'mAlert.pas' {AlertForm},
@@ -31,7 +26,8 @@ uses
   mFrame in 'mFrame.pas',
   mIPMessenger in 'mIPMessenger.pas',
   mMsg in 'mMsg.pas',
-  mPlugin in 'mPlugin.pas';
+  mPlugin in 'mPlugin.pas',
+  mPerMonitorDpi in 'mPerMonitorDpi.pas';
 
 const
   IDS_MENU_TEXT = 1;
@@ -41,7 +37,9 @@ const
 var
   FList: TFrameList;
 
+{$IFDEF DEBUG}
 {$R *.res}
+{$ENDIF}
 
 
 procedure OnCommand(hwnd: HWND); stdcall;
@@ -176,6 +174,8 @@ exports
   PluginProc;
 
 begin
-  // ReportMemoryLeaksOnShutdown := True;
+{$IFDEF DEBUG}
+  ReportMemoryLeaksOnShutdown := True;
+{$ENDIF}
 
 end.

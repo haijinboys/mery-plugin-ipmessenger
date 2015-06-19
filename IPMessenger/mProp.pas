@@ -11,10 +11,10 @@ uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, StdCtrls, ExtCtrls,
 {$IFEND}
-  MeryCtrls, mMain;
+  MeryCtrls, mMain, mPerMonitorDpi;
 
 type
-  TPropForm = class(TForm)
+  TPropForm = class(TScaledForm)
     BarPosLabel: TLabel;
     BarPosComboBox: TComboBox;
     PortLabel: TLabel;
@@ -92,9 +92,9 @@ begin
     end;
   with Font do
   begin
-    ChangeScale(FFontSize, Size);
-    Name := FFontName;
-    Size := FFontSize;
+    ChangeScale(FFont.Size, Size);
+    Name := FFont.Name;
+    Size := FFont.Size;
   end;
 end;
 

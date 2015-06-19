@@ -20,7 +20,7 @@ uses
 
 resourcestring
   SName = 'IPメッセンジャー';
-  SVersion = '2.0.2';
+  SVersion = '2.1.0';
 
 type
   TIPMessengerFrame = class(TFrame)
@@ -268,6 +268,11 @@ begin
   end;
   if (nEvent and EVENT_IDLE) <> 0 then
     OnIdle;
+  if (nEvent and EVENT_DPI_CHANGED) <> 0 then
+  begin
+    if FForm <> nil then
+      FForm.SetScale(lParam);
+  end;
 end;
 
 function TIPMessengerFrame.PluginProc(hwnd: HWND; nMsg: NativeInt; wParam: WPARAM; lParam: LPARAM): LRESULT;

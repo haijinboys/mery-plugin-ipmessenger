@@ -84,7 +84,7 @@ implementation
 
 uses
 {$IF CompilerVersion > 22.9}
-  System.IniFiles,
+  System.IniFiles, System.Contnrs,
 {$ELSE}
   IniFiles,
 {$IFEND}
@@ -108,12 +108,12 @@ begin
           S2 := THost(Item2).hostSub.userName
         else
           S2 := THost(Item2).nickName;
-        Result := FHostSortFlag * CompareText(Utf8ToAnsi(S1), Utf8ToAnsi(S2));
+        Result := FHostSortFlag * CompareText(string(S1), string(S2));
       end;
     1:
-      Result := FHostSortFlag * CompareText(Utf8ToAnsi(THost(Item1).groupName), Utf8ToAnsi(THost(Item2).groupName));
+      Result := FHostSortFlag * CompareText(string(THost(Item1).groupName), string(THost(Item2).groupName));
     2:
-      Result := FHostSortFlag * CompareText(Utf8ToAnsi(THost(Item1).hostSub.hostName), Utf8ToAnsi(THost(Item2).hostSub.hostName));
+      Result := FHostSortFlag * CompareText(string(THost(Item1).hostSub.hostName), string(THost(Item2).hostSub.hostName));
   end;
 end;
 
@@ -333,9 +333,9 @@ begin
     AUserName := UserName;
   case mt of
     mtNone:
-      AMsg := TMsgItem.Create(True, Utf8ToAnsi(AUserName), Now, Utf8ToAnsi(Msg), Addr, PacketNo, False);
+      AMsg := TMsgItem.Create(True, string(AUserName), Now, string(Msg), Addr, PacketNo, False);
     mtSecret, mtPassword:
-      AMsg := TMsgItem.Create(True, Utf8ToAnsi(AUserName), Now, Utf8ToAnsi(Msg), Addr, PacketNo, True);
+      AMsg := TMsgItem.Create(True, string(AUserName), Now, string(Msg), Addr, PacketNo, True);
   end;
   if Assigned(AMsg) then
   begin
@@ -344,7 +344,7 @@ begin
       with FAlertForm do
       begin
         MsgItem := AMsg;
-        AlertLabel.Caption := Utf8ToAnsi(AUserName) + ' からの新着メッセージが届きました。';
+        AlertLabel.Caption := string(AUserName) + ' からの新着メッセージが届きました。';
         Alert;
       end;
   end;
@@ -400,12 +400,12 @@ begin
   FIPMsg.SecretCheck := Secret;
   FIPMsg.OpenCheck := True;
   FIPMsg.PasswordCheck := False;
-  FIPMsg.NormalSend(AnsiToUtf8(Msg));
+  FIPMsg.NormalSend(AnsiString(Msg));
   if Host.nickName = '' then
     AUserName := Host.hostSub.userName
   else
     AUserName := Host.nickName;
-  FOutBoxList.Insert(0, TMsgItem.Create(True, Utf8ToAnsi(AUserName), Now, Msg, Host.addr, Pred(FIPMsg.packetNo), False));
+  FOutBoxList.Insert(0, TMsgItem.Create(True, string(AUserName), Now, Msg, Host.addr, Pred(FIPMsg.packetNo), False));
   RefreshOutBoxListView;
   Inc(FIPMsg.packetNo);
 end;

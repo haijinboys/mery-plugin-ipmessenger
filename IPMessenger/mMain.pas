@@ -14,15 +14,15 @@ uses
 {$IF CompilerVersion > 22.9}
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants,
   System.Classes, Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs,
-  Vcl.Menus, Vcl.ImgList, Vcl.StdCtrls, Vcl.ExtCtrls, Vcl.ComCtrls;
+  Vcl.Menus, Vcl.ImgList, Vcl.StdCtrls, Vcl.ExtCtrls, Vcl.ComCtrls,
 {$ELSE}
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, Menus, ImgList, StdCtrls, ExtCtrls, ComCtrls;
+  Dialogs, Menus, ImgList, StdCtrls, ExtCtrls, ComCtrls,
 {$IFEND}
-
+  mPerMonitorDpi;
 
 type
-  TMainForm = class(TForm)
+  TMainForm = class(TScaledForm)
     HostPopupMenu: TPopupMenu;
     SendThisMenuItem: TMenuItem;
     SendSelMenuItem: TMenuItem;
@@ -98,6 +98,7 @@ type
   public
     { Public 宣言 }
     procedure IPMessengerAll;
+    procedure SetScale(const Value: NativeInt);
     function SetProperties: Boolean;
     procedure RefreshHostListView;
     procedure RefreshInBoxListView;
@@ -111,8 +112,7 @@ type
 var
   MainForm: TMainForm;
   FApplication: THandle;
-  FFontName: string;
-  FFontSize: NativeInt;
+  FFont: TFont;
 
 implementation
 
@@ -137,15 +137,16 @@ begin
       Size := 8;
     end;
   FEditor := ParentWindow;
+  FFont.Assign(Font);
   FUpdateIPMessenger := False;
   FListViewWidth := 320;
   FListViewHeight := 320;
   ReadIni;
   with Font do
   begin
-    ChangeScale(FFontSize, Size);
-    Name := FFontName;
-    Size := FFontSize;
+    ChangeScale(FFont.Size, Size);
+    Name := FFont.Name;
+    Size := FFont.Size;
   end;
 end;
 
@@ -395,9 +396,9 @@ begin
     begin
       H := HostList[Item.Index];
       if H.nickName <> '' then
-        AUserName := Utf8ToAnsi(H.nickName)
+        AUserName := string(H.nickName)
       else
-        AUserName := Utf8ToAnsi(H.hostSub.userName);
+        AUserName := string(H.hostSub.userName);
       if Pos('(取り込み中)', AUserName) > 0 then
         Item.StateIndex := 1
       else if Pos('(退席中)', AUserName) > 0 then
@@ -405,8 +406,8 @@ begin
       else
         Item.StateIndex := 0;
       Item.Caption := AUserName;
-      Item.SubItems.AddObject(Utf8ToAnsi(H.groupName), H);
-      Item.SubItems.Add(Utf8ToAnsi(H.hostSub.hostName));
+      Item.SubItems.AddObject(string(H.groupName), H);
+      Item.SubItems.Add(string(H.hostSub.hostName));
     end;
   end;
 end;
@@ -519,19 +520,24 @@ begin
     Exit;
   with TMemIniFile.Create(S, TEncoding.UTF8) do
     try
-      FFontName := ReadString('MainForm', 'FontName', Font.Name);
-      FFontSize := ReadInteger('MainForm', 'FontSize', Font.Size);
-      // リストビュー幅
+      with FFont do
+        if ValueExists('MainForm', 'FontName') then
+        begin
+          Name := ReadString('MainForm', 'FontName', Name);
+          Size := ReadInteger('MainForm', 'FontSize', Size);
+          Height := MulDiv(Height, 96, Screen.PixelsPerInch);
+        end
+        else if (Win32MajorVersion > 6) or ((Win32MajorVersion = 6) and (Win32MinorVersion >= 2)) then
+        begin
+          Assign(Screen.IconFont);
+          Height := MulDiv(Height, 96, Screen.PixelsPerInch);
+        end;
       FListViewWidth := ReadInteger('IPMessenger', 'ListViewWidth', FListViewWidth);
-      // リストビュー高
       FListViewHeight := ReadInteger('IPMessenger', 'ListViewHeight', FListViewHeight);
-      // ホストリストビューカラム幅
       for I := 0 to 2 do
         HostListView.Columns[I].Width := ReadInteger('IPMessenger', 'HostColumnWidth' + IntToStr(I), HostListView.Columns[I].Width);
-      // 受信トレイリストビューカラム幅
       for I := 0 to 1 do
         InBoxListView.Columns[I].Width := ReadInteger('IPMessenger', 'InBoxColumnWidth' + IntToStr(I), InBoxListView.Columns[I].Width);
-      // 送信トレイリストビューカラム幅
       for I := 0 to 1 do
         OutBoxListView.Columns[I].Width := ReadInteger('IPMessenger', 'OutBoxColumnWidth' + IntToStr(I), OutBoxListView.Columns[I].Width);
     finally
@@ -550,17 +556,12 @@ begin
     with TMemIniFile.Create(S, TEncoding.UTF8) do
       try
         WriteInteger('IPMessenger', 'CustomBarPos', FBarPos);
-        // リストビュー幅
         WriteInteger('IPMessenger', 'ListViewWidth', HostListView.Width);
-        // リストビュー高
         WriteInteger('IPMessenger', 'ListViewHeight', HostListView.Height);
-        // ホストリストビューカラム幅
         for I := 0 to 2 do
           WriteInteger('IPMessenger', 'HostColumnWidth' + IntToStr(I), HostListView.Columns[I].Width);
-        // 受信トレイリストビューカラム幅
         for I := 0 to 1 do
           WriteInteger('IPMessenger', 'InBoxColumnWidth' + IntToStr(I), InBoxListView.Columns[I].Width);
-        // 送信トレイリストビューカラム幅
         for I := 0 to 1 do
           WriteInteger('IPMessenger', 'OutBoxColumnWidth' + IntToStr(I), OutBoxListView.Columns[I].Width);
         UpdateFile;
@@ -704,6 +705,16 @@ begin
   RefreshOutBoxListView;
 end;
 
+procedure TMainForm.SetScale(const Value: NativeInt);
+var
+  P: NativeInt;
+begin
+  P := PixelsPerInch;
+  PixelsPerInch := Value;
+  with Font do
+    Height := MulDiv(Height, Self.PixelsPerInch, P);
+end;
+
 function TMainForm.SetProperties: Boolean;
 var
   APort: NativeInt;
@@ -791,5 +802,14 @@ begin
       end;
   end;
 end;
+
+initialization
+
+FFont := TFont.Create;
+
+finalization
+
+if Assigned(FFont) then
+  FreeAndNil(FFont);
 
 end.

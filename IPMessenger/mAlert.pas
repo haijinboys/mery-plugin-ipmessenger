@@ -11,10 +11,10 @@ uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, Menus, StdCtrls, ExtCtrls, Buttons,
 {$IFEND}
-  MeryCtrls, mMsgClass;
+  MeryCtrls, mMsgClass, mPerMonitorDpi;
 
 type
-  TAlertForm = class(TForm)
+  TAlertForm = class(TScaledForm)
     AlertImage: TImage;
     AlertLabel: TLabel;
     CloseButton: TCloseButton;
