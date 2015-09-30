@@ -11,7 +11,12 @@ uses
   Windows, WinSock, SysUtils, Classes, Messages, Forms, Dialogs;
 *)
 uses
+{$IF CompilerVersion > 22.9}
+  Winapi.Windows, Winapi.WinSock, System.SysUtils, System.Classes,
+  Winapi.Messages, Vcl.Dialogs;
+{$ELSE}
   Windows, WinSock, SysUtils, Classes, Messages, Dialogs;
+{$IFEND}
 // modified end
 
 const
@@ -540,6 +545,9 @@ end;
 
 destructor	THostList.Destroy;
 begin
+  // modified begin
+  Clear;
+  // modified end
 	FItems.Free;
 	FHosts.Free;
 	inherited Destroy;
@@ -586,6 +594,9 @@ var
 begin
 	for i := 0 to FHosts.Count -1 do begin
 		if THost(FHosts[i]) = Host then begin
+      // modified begin
+      THost(FHosts[I]).Free;
+      // modified end
 			FHosts.Delete(i);
 			FItems.Delete(i);
 			Break;
@@ -594,7 +605,15 @@ begin
 end;
 
 procedure THostList.Clear;
+// modified begin
+var
+  I: NativeInt;
+// modified end
 begin
+  // modified begin
+  for I := 0 to Count - 1 do
+    THost(FHosts[I]).Free;
+  // modified end
 	FHosts.Clear;
 	FItems.Clear;
 end;
@@ -666,7 +685,16 @@ procedure TMsgMng.CloseSocket;
 begin
 	if udp_sd <> INVALID_SOCKET then
 	begin
+    // modified begin
+    (*
 		winsock.closesocket(udp_sd);
+    *)
+    {$IF CompilerVersion > 22.9}
+  		Winapi.winsock.closesocket(udp_sd);
+    {$ELSE}
+		  winsock.closesocket(udp_sd);
+    {$IFEND}
+    // modified end
 		udp_sd := INVALID_SOCKET;
 	end;
 end;
@@ -1556,6 +1584,11 @@ begin
 		Exit;
 	end;
 
+  // modified begin
+	LastPacketHost := msg.hostSub.addr;
+	LastPacketNo	:= msg.packetNo;
+  // modified end
+
 	// メッセージ受信。ここで、ユーザ定義のメソッドを呼び出す。
 	if msg.command and IPMSG_PASSWORDOPT <> 0 then
 		mt := mtPassword
@@ -1584,8 +1617,12 @@ begin
 			BroadcastEntrySub(msg.hostSub.addr, IPMSG_BR_ENTRY);
 	end;
 
+  // modified begin
+  (*
 	LastPacketHost := msg.hostSub.addr;
 	LastPacketNo	:= msg.packetNo;
+  *)
+  // modified end
 end;
 
 procedure TIPMsg.OnTimer(timerID : WParam);
