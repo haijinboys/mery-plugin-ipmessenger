@@ -172,38 +172,38 @@ procedure TMsgr.SetMyStatus(const Value: TStatus);
   end;
 
 var
-  AUserName: AnsiString;
+  LUserName: AnsiString;
 begin
   FStatus := Value;
   if FUserName = '' then
-    AUserName := AnsiToUtf8(GetUserName)
+    LUserName := AnsiToUtf8(GetUserName)
   else
-    AUserName := AnsiToUtf8(FUserName);
+    LUserName := AnsiToUtf8(FUserName);
   case FStatus of
     stOnline:
       begin
-        FIPMsg.NickNameStr := AUserName;
+        FIPMsg.NickNameStr := LUserName;
         if HostList.Count <= 0 then
           FIPMsg.Open;
         Refresh;
       end;
     stBusy:
       begin
-        FIPMsg.NickNameStr := AUserName + AnsiToUtf8(' (取り込み中)');
+        FIPMsg.NickNameStr := LUserName + ' (取り込み中)';
         if HostList.Count <= 0 then
           FIPMsg.Open;
         Refresh;
       end;
     stAway:
       begin
-        FIPMsg.NickNameStr := AUserName + AnsiToUtf8(' (退席中)');
+        FIPMsg.NickNameStr := LUserName + ' (退席中)';
         if HostList.Count <= 0 then
           FIPMsg.Open;
         Refresh;
       end;
     stOffline:
       begin
-        FIPMsg.NickNameStr := AUserName;
+        FIPMsg.NickNameStr := LUserName;
         if HostList.Count > 0 then
           FIPMsg.Close;
       end;
@@ -314,37 +314,37 @@ end;
 procedure TMsgr.MsgrMsgArrived(Sender: TObject;
   UserName, HostName, Msg: AnsiString; mt: TMsgTypes; Addr, PacketNo: ULONG);
 var
-  Index: NativeInt;
-  AUserName: AnsiString;
-  AMsg: TMsgItem;
+  Index: Integer;
+  LUserName: AnsiString;
+  LMsg: TMsgItem;
 begin
   if not Assigned(FList) then
     Exit;
-  AMsg := nil;
+  LMsg := nil;
   Index := HostList.IndexOf(Addr);
   if (Index > -1) and (Index < HostList.Count) then
   begin
     if HostList[Index].nickName <> '' then
-      AUserName := HostList[Index].nickName
+      LUserName := HostList[Index].nickName
     else
-      AUserName := UserName;
+      LUserName := UserName;
   end
   else
-    AUserName := UserName;
+    LUserName := UserName;
   case mt of
     mtNone:
-      AMsg := TMsgItem.Create(True, string(AUserName), Now, string(Msg), Addr, PacketNo, False);
+      LMsg := TMsgItem.Create(True, string(LUserName), Now, string(Msg), Addr, PacketNo, False);
     mtSecret, mtPassword:
-      AMsg := TMsgItem.Create(True, string(AUserName), Now, string(Msg), Addr, PacketNo, True);
+      LMsg := TMsgItem.Create(True, string(LUserName), Now, string(Msg), Addr, PacketNo, True);
   end;
-  if Assigned(AMsg) then
+  if Assigned(LMsg) then
   begin
-    FInBoxList.Insert(0, AMsg);
+    FInBoxList.Insert(0, LMsg);
     if FDisplayAlerts then
       with FAlertForm do
       begin
-        MsgItem := AMsg;
-        AlertLabel.Caption := string(AUserName) + ' からの新着メッセージが届きました。';
+        MsgItem := LMsg;
+        AlertLabel.Caption := string(LUserName) + ' からの新着メッセージが届きました。';
         Alert;
       end;
   end;
@@ -353,7 +353,7 @@ end;
 
 procedure TMsgr.MsgrMsgInfo(Sender: TObject; addr: ULONG; mi: TMsgInfo; PacketNo: ULONG);
 var
-  Index: NativeInt;
+  Index: Integer;
 begin
   Index := HostList.IndexOf(Addr);
   if (Index > -1) and (Index < HostList.Count) then
@@ -391,8 +391,8 @@ end;
 
 procedure TMsgr.SendMessage(Host: THost; Msg: string; Secret: Boolean);
 var
-  I: NativeInt;
-  AUserName: AnsiString;
+  I: Integer;
+  LUserName: AnsiString;
 begin
   for I := 0 to HostList.Count - 1 do
     HostList[I].SendCheck := False;
@@ -402,10 +402,10 @@ begin
   FIPMsg.PasswordCheck := False;
   FIPMsg.NormalSend(AnsiString(Msg));
   if Host.nickName = '' then
-    AUserName := Host.hostSub.userName
+    LUserName := Host.hostSub.userName
   else
-    AUserName := Host.nickName;
-  FOutBoxList.Insert(0, TMsgItem.Create(True, string(AUserName), Now, Msg, Host.addr, Pred(FIPMsg.packetNo), False));
+    LUserName := Host.nickName;
+  FOutBoxList.Insert(0, TMsgItem.Create(True, string(LUserName), Now, Msg, Host.addr, Pred(FIPMsg.packetNo), False));
   RefreshOutBoxListView;
   Inc(FIPMsg.packetNo);
 end;
@@ -417,40 +417,40 @@ end;
 
 procedure TMsgr.RefreshHostListView;
 var
-  I: NativeInt;
-  AForm: TMainForm;
+  I: Integer;
+  LForm: TMainForm;
 begin
   for I := 0 to FList.Count - 1 do
   begin
-    AForm := TIPMessengerFrame(FList[I]).Form;
-    if Assigned(AForm) then
-      AForm.RefreshHostListView;
+    LForm := TIPMessengerFrame(FList[I]).Form;
+    if Assigned(LForm) then
+      LForm.RefreshHostListView;
   end;
 end;
 
 procedure TMsgr.RefreshInBoxListView;
 var
-  I: NativeInt;
-  AForm: TMainForm;
+  I: Integer;
+  LForm: TMainForm;
 begin
   for I := 0 to FList.Count - 1 do
   begin
-    AForm := TIPMessengerFrame(FList[I]).Form;
-    if Assigned(AForm) then
-      AForm.RefreshInBoxListView;
+    LForm := TIPMessengerFrame(FList[I]).Form;
+    if Assigned(LForm) then
+      LForm.RefreshInBoxListView;
   end;
 end;
 
 procedure TMsgr.RefreshOutBoxListView;
 var
-  I: NativeInt;
-  AForm: TMainForm;
+  I: Integer;
+  LForm: TMainForm;
 begin
   for I := 0 to FList.Count - 1 do
   begin
-    AForm := TIPMessengerFrame(FList[I]).Form;
-    if Assigned(AForm) then
-      AForm.RefreshOutBoxListView;
+    LForm := TIPMessengerFrame(FList[I]).Form;
+    if Assigned(LForm) then
+      LForm.RefreshOutBoxListView;
   end;
 end;
 

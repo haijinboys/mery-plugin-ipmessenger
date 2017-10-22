@@ -42,14 +42,14 @@ type
     procedure DoSort(const Index: Integer);
   public
     { Public êÈåæ }
-    procedure SortByColumnIndex(const Index: NativeInt);
-    function IndexOfSub(const Addr, PacketNo: ULONG): NativeInt;
+    procedure SortByColumnIndex(const Index: Integer);
+    function IndexOfSub(const Addr, PacketNo: ULONG): Integer;
     property Items[Index: Integer]: TMsgItem read Get write Put; default;
   end;
 
 var
-  FMsgSortIndex: NativeInt = 0;
-  FMsgSortFlag: NativeInt = 1;
+  FMsgSortIndex: Integer = 0;
+  FMsgSortFlag: Integer = 1;
 
 implementation
 
@@ -90,7 +90,7 @@ end;
 
 function TMsgList.Get(Index: Integer): TMsgItem;
 begin
-  Result := TMsgItem( inherited Get(Index));
+  Result := TMsgItem(inherited Get(Index));
 end;
 
 procedure TMsgList.Put(Index: Integer; const Value: TMsgItem);
@@ -98,7 +98,7 @@ begin
   inherited Put(Index, Value);
 end;
 
-function TMsgList.IndexOfSub(const Addr, PacketNo: ULONG): NativeInt;
+function TMsgList.IndexOfSub(const Addr, PacketNo: ULONG): Integer;
 begin
   for Result := 0 to Count - 1 do
     if (Get(Result).Addr = Addr) and (Get(Result).PacketNo = PacketNo) then
@@ -113,7 +113,7 @@ begin
   FMsgSortFlag := -FMsgSortFlag;
 end;
 
-procedure TMsgList.SortByColumnIndex(const Index: NativeInt);
+procedure TMsgList.SortByColumnIndex(const Index: Integer);
 begin
   if Count < 1 then
     Exit;

@@ -3,7 +3,7 @@
 //
 // Copyright (c) Kuro. All Rights Reserved.
 // e-mail: info@haijin-boys.com
-// www:    http://www.haijin-boys.com/
+// www:    https://www.haijin-boys.com/
 // -----------------------------------------------------------------------------
 
 unit mIPMessenger;
@@ -20,15 +20,15 @@ uses
 
 resourcestring
   SName = 'IPメッセンジャー';
-  SVersion = '2.1.0';
+  SVersion = '2.3.1';
 
 type
   TIPMessengerFrame = class(TFrame)
   private
     { Private 宣言 }
     FForm: TMainForm;
-    FClientID: LongWord;
-    FBarPos: NativeInt;
+    FClientID: Cardinal;
+    FBarPos: Integer;
     FOpenStartup: Boolean;
     function QueryProperties: Boolean;
     function SetProperties: Boolean;
@@ -43,8 +43,8 @@ type
     procedure OnIdle;
     procedure OnCommand(hwnd: HWND); override;
     function QueryStatus(hwnd: HWND; pbChecked: PBOOL): BOOL; override;
-    procedure OnEvents(hwnd: HWND; nEvent: NativeInt; lParam: LPARAM); override;
-    function PluginProc(hwnd: HWND; nMsg: NativeInt; wParam: WPARAM; lParam: LPARAM): LRESULT; override;
+    procedure OnEvents(hwnd: HWND; nEvent: Cardinal; lParam: LPARAM); override;
+    function PluginProc(hwnd: HWND; nMsg: Cardinal; wParam: WPARAM; lParam: LPARAM): LRESULT; override;
     property Form: TMainForm read FForm;
   end;
 
@@ -201,7 +201,7 @@ begin
   Result := True;
 end;
 
-procedure TIPMessengerFrame.OnEvents(hwnd: HWND; nEvent: NativeInt; lParam: LPARAM);
+procedure TIPMessengerFrame.OnEvents(hwnd: HWND; nEvent: Cardinal; lParam: LPARAM);
 var
   S: string;
   Info: TCustomBarCloseInfo;
@@ -275,7 +275,7 @@ begin
   end;
 end;
 
-function TIPMessengerFrame.PluginProc(hwnd: HWND; nMsg: NativeInt; wParam: WPARAM; lParam: LPARAM): LRESULT;
+function TIPMessengerFrame.PluginProc(hwnd: HWND; nMsg: Cardinal; wParam: WPARAM; lParam: LPARAM): LRESULT;
 begin
   Result := 0;
   case nMsg of

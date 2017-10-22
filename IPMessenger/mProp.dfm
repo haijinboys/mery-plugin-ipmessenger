@@ -3,7 +3,7 @@ object PropForm: TPropForm
   Top = 0
   BorderStyle = bsDialog
   Caption = 'IP'#12513#12483#12475#12531#12472#12515#12540
-  ClientHeight = 177
+  ClientHeight = 169
   ClientWidth = 281
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -12,7 +12,6 @@ object PropForm: TPropForm
   Font.Name = 'Tahoma'
   Font.Style = []
   OldCreateOrder = False
-  Position = poScreenCenter
   OnClose = FormClose
   OnCreate = FormCreate
   OnDestroy = FormDestroy
@@ -40,6 +39,7 @@ object PropForm: TPropForm
     Width = 48
     Height = 13
     Caption = #12509#12540#12488'(&O):'
+    FocusControl = PortSpinEdit
   end
   object UserNameLabel: TLabel
     Left = 144
@@ -47,6 +47,7 @@ object PropForm: TPropForm
     Width = 49
     Height = 13
     Caption = #12518#12540#12470'(&U):'
+    FocusControl = UserNameEdit
   end
   object GroupNameLabel: TLabel
     Left = 144
@@ -54,6 +55,7 @@ object PropForm: TPropForm
     Width = 57
     Height = 13
     Caption = #12464#12523#12540#12503'(&G):'
+    FocusControl = GroupNameEdit
   end
   object BarPosComboBox: TComboBox
     Left = 8
@@ -70,7 +72,7 @@ object PropForm: TPropForm
   end
   object OKButton: TButton
     Left = 104
-    Top = 144
+    Top = 136
     Width = 81
     Height = 25
     Caption = 'OK'
@@ -80,7 +82,7 @@ object PropForm: TPropForm
   end
   object CancelButton: TButton
     Left = 192
-    Top = 144
+    Top = 136
     Width = 81
     Height = 25
     Cancel = True
@@ -93,6 +95,7 @@ object PropForm: TPropForm
     Top = 72
     Width = 129
     Height = 22
+    MaxLength = 5
     MaxValue = 65535
     MinValue = 1024
     TabOrder = 1

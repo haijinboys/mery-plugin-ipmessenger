@@ -133,13 +133,13 @@ type
   // modified end
 
 // Record	 //////////////////////////////////////////////////////////////////////////////////////////
-	THostSub = packed record
+	THostSub = record
 		userName : array[0..MAX_NAMEBUF] of AnsiChar;
 		hostName : array[0..MAX_NAMEBUF] of AnsiChar;
 		addr	 : ULONG;
 	end;
 
-	TMsgBuf = packed record
+	TMsgBuf = record
 		hostSub	 : THostSub;
 		version	 : integer;
 		portNo	 : integer;
@@ -149,7 +149,7 @@ type
 		exOffset : integer;		// expand message offset in msgBuf
 	end;
 
-	TRecvBuf = packed record
+	TRecvBuf = record
 		addr	 : TSockAddrin;
 		addrSize : integer;
 		size	 : integer;
@@ -607,7 +607,7 @@ end;
 procedure THostList.Clear;
 // modified begin
 var
-  I: NativeInt;
+  I: Integer;
 // modified end
 begin
   // modified begin

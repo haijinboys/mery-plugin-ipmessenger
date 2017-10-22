@@ -3,7 +3,7 @@
 //
 // Copyright (c) Kuro. All Rights Reserved.
 // e-mail: info@haijin-boys.com
-// www:    http://www.haijin-boys.com/
+// www:    https://www.haijin-boys.com/
 // -----------------------------------------------------------------------------
 
 unit mMain;
@@ -42,7 +42,10 @@ type
     OutBoxPopupMenu: TPopupMenu;
     OutBoxOpenMenuItem: TMenuItem;
     OutBoxDeleteMenuItem: TMenuItem;
-    ImageList: TImageList;
+    SmallImageList: TImageList;
+    MediumImageList: TImageList;
+    LargeImageList: TImageList;
+    ExtraLargeImageList: TImageList;
     HostListView: TListView;
     Splitter: TSplitter;
     PageControl: TPageControl;
@@ -85,26 +88,27 @@ type
   private
     { Private êÈåæ }
     FEditor: THandle;
-    FBarPos: NativeInt;
+    FBarPos: Integer;
     FUpdateIPMessenger: Boolean;
-    FListViewWidth: NativeInt;
-    FListViewHeight: NativeInt;
+    FListViewWidth: Integer;
+    FListViewHeight: Integer;
     procedure ReadIni;
     procedure WriteIni;
     procedure InBoxOpen;
     procedure InBoxDelete;
     procedure OutBoxOpen;
     procedure OutBoxDelete;
+    procedure UpdateListView;
   public
     { Public êÈåæ }
     procedure IPMessengerAll;
-    procedure SetScale(const Value: NativeInt);
+    procedure SetScale(const Value: Integer);
     function SetProperties: Boolean;
     procedure RefreshHostListView;
     procedure RefreshInBoxListView;
     procedure RefreshOutBoxListView;
     procedure UpdateBarPos;
-    property BarPos: NativeInt read FBarPos write FBarPos;
+    property BarPos: Integer read FBarPos write FBarPos;
     property UpdateIPMessenger: Boolean read FUpdateIPMessenger write FUpdateIPMessenger;
     property Editor: THandle read FEditor write FEditor;
   end;
@@ -112,7 +116,6 @@ type
 var
   MainForm: TMainForm;
   FApplication: THandle;
-  FFont: TFont;
 
 implementation
 
@@ -130,24 +133,12 @@ uses
 
 procedure TMainForm.FormCreate(Sender: TObject);
 begin
-  if Win32MajorVersion < 6 then
-    with Font do
-    begin
-      Name := 'Tahoma';
-      Size := 8;
-    end;
+  TScaledForm.DefaultFont.Assign(Font);
   FEditor := ParentWindow;
-  FFont.Assign(Font);
   FUpdateIPMessenger := False;
   FListViewWidth := 320;
   FListViewHeight := 320;
   ReadIni;
-  with Font do
-  begin
-    ChangeScale(FFont.Size, Size);
-    Name := FFont.Name;
-    Size := FFont.Size;
-  end;
 end;
 
 procedure TMainForm.FormDestroy(Sender: TObject);
@@ -157,7 +148,7 @@ end;
 
 procedure TMainForm.FormShow(Sender: TObject);
 begin
-  //
+  UpdateListView;
 end;
 
 procedure TMainForm.FormClose(Sender: TObject; var Action: TCloseAction);
@@ -167,7 +158,7 @@ end;
 
 procedure TMainForm.HostPopupMenuPopup(Sender: TObject);
 var
-  Len: NativeInt;
+  Len: Cardinal;
 begin
   Len := Editor_GetSelText(FEditor, 0, nil);
   SendThisMenuItem.Enabled := (HostListView.SelCount > 0) and
@@ -181,7 +172,8 @@ end;
 procedure TMainForm.SendThisMenuItemClick(Sender: TObject);
 var
   S: string;
-  I, Len: NativeInt;
+  I: Integer;
+  Len: Cardinal;
   P1, P2: TPoint;
   H: THost;
 begin
@@ -220,7 +212,8 @@ end;
 procedure TMainForm.SendSelMenuItemClick(Sender: TObject);
 var
   S: string;
-  I, Len: NativeInt;
+  I: Integer;
+  Len: Cardinal;
   H: THost;
 begin
   with HostListView, FMsgr do
@@ -372,7 +365,7 @@ procedure TMainForm.HostListViewData(Sender: TObject; Item: TListItem);
   end;
 
 var
-  AUserName: string;
+  LUserName: string;
   H: THost;
 begin
   if not Assigned(FMsgr) then
@@ -384,11 +377,11 @@ begin
     if HostList.Count = 0 then
     begin
       if UserName = '' then
-        AUserName := GetUserName
+        LUserName := GetUserName
       else
-        AUserName := UserName;
+        LUserName := UserName;
       Item.StateIndex := 3;
-      Item.Caption := AUserName;
+      Item.Caption := LUserName;
       Item.SubItems.AddObject('', nil);
       Item.SubItems.Add('');
     end
@@ -396,16 +389,16 @@ begin
     begin
       H := HostList[Item.Index];
       if H.nickName <> '' then
-        AUserName := string(H.nickName)
+        LUserName := string(H.nickName)
       else
-        AUserName := string(H.hostSub.userName);
-      if Pos('(éÊÇËçûÇ›íÜ)', AUserName) > 0 then
+        LUserName := string(H.hostSub.userName);
+      if Pos('(éÊÇËçûÇ›íÜ)', LUserName) > 0 then
         Item.StateIndex := 1
-      else if Pos('(ëﬁê»íÜ)', AUserName) > 0 then
+      else if Pos('(ëﬁê»íÜ)', LUserName) > 0 then
         Item.StateIndex := 2
       else
         Item.StateIndex := 0;
-      Item.Caption := AUserName;
+      Item.Caption := LUserName;
       Item.SubItems.AddObject(string(H.groupName), H);
       Item.SubItems.Add(string(H.hostSub.hostName));
     end;
@@ -514,24 +507,20 @@ end;
 procedure TMainForm.ReadIni;
 var
   S: string;
-  I: NativeInt;
+  I: Integer;
 begin
   if not GetIniFileName(S) then
     Exit;
   with TMemIniFile.Create(S, TEncoding.UTF8) do
     try
-      with FFont do
+      with TScaledForm.DefaultFont do
         if ValueExists('MainForm', 'FontName') then
         begin
           Name := ReadString('MainForm', 'FontName', Name);
           Size := ReadInteger('MainForm', 'FontSize', Size);
-          Height := MulDiv(Height, 96, Screen.PixelsPerInch);
         end
-        else if (Win32MajorVersion > 6) or ((Win32MajorVersion = 6) and (Win32MinorVersion >= 2)) then
-        begin
+        else if CheckWin32Version(6, 2) then
           Assign(Screen.IconFont);
-          Height := MulDiv(Height, 96, Screen.PixelsPerInch);
-        end;
       FListViewWidth := ReadInteger('IPMessenger', 'ListViewWidth', FListViewWidth);
       FListViewHeight := ReadInteger('IPMessenger', 'ListViewHeight', FListViewHeight);
       for I := 0 to 2 do
@@ -548,7 +537,7 @@ end;
 procedure TMainForm.WriteIni;
 var
   S: string;
-  I: NativeInt;
+  I: Integer;
 begin
   if FIniFailed or (not GetIniFileName(S)) then
     Exit;
@@ -614,7 +603,7 @@ end;
 
 procedure TMainForm.InBoxDelete;
 var
-  I: NativeInt;
+  I: Integer;
   Item: TListItem;
 begin
   with FMsgr do
@@ -673,7 +662,7 @@ end;
 
 procedure TMainForm.OutBoxDelete;
 var
-  I: NativeInt;
+  I: Integer;
   Item: TListItem;
 begin
   with FMsgr do
@@ -698,6 +687,28 @@ begin
   end;
 end;
 
+procedure TMainForm.UpdateListView;
+begin
+  with HostListView do
+    if PixelsPerInch >= 240 then
+      StateImages := ExtraLargeImageList
+    else if PixelsPerInch >= 192 then
+      StateImages := LargeImageList
+    else if PixelsPerInch >= 144 then
+      StateImages := MediumImageList
+    else
+      StateImages := SmallImageList;
+  with InBoxListView do
+    if PixelsPerInch >= 240 then
+      StateImages := ExtraLargeImageList
+    else if PixelsPerInch >= 192 then
+      StateImages := LargeImageList
+    else if PixelsPerInch >= 144 then
+      StateImages := MediumImageList
+    else
+      StateImages := SmallImageList;
+end;
+
 procedure TMainForm.IPMessengerAll;
 begin
   RefreshHostListView;
@@ -705,43 +716,44 @@ begin
   RefreshOutBoxListView;
 end;
 
-procedure TMainForm.SetScale(const Value: NativeInt);
+procedure TMainForm.SetScale(const Value: Integer);
 var
-  P: NativeInt;
+  P: Integer;
 begin
   P := PixelsPerInch;
   PixelsPerInch := Value;
   with Font do
     Height := MulDiv(Height, Self.PixelsPerInch, P);
+  UpdateListView;
 end;
 
 function TMainForm.SetProperties: Boolean;
 var
-  APort: NativeInt;
-  AUserName, AGroupName: string;
-  ADisplayAlert: Boolean;
-  AOnline: Boolean;
+  LPort: Integer;
+  LUserName, LGroupName: string;
+  LDisplayAlert: Boolean;
+  LOnline: Boolean;
 begin
   Result := False;
-  APort := FMsgr.Port;
-  AUserName := FMsgr.UserName;
-  AGroupName := FMsgr.GroupName;
-  ADisplayAlert := FMsgr.DisplayAlert;
-  if Prop(Self, FBarPos, APort, AUserName, AGroupName, ADisplayAlert) then
+  LPort := FMsgr.Port;
+  LUserName := FMsgr.UserName;
+  LGroupName := FMsgr.GroupName;
+  LDisplayAlert := FMsgr.DisplayAlert;
+  if Prop(Self, FBarPos, LPort, LUserName, LGroupName, LDisplayAlert) then
   begin
-    AOnline := False;
+    LOnline := False;
     if (FMsgr.HostList.Count > 0) and (FMsgr.Status <> stOffline) then
     begin
-      AOnline := True;
+      LOnline := True;
       FMsgr.Close;
     end;
-    FMsgr.Port := APort;
-    FMsgr.UserName := AUserName;
-    FMsgr.GroupName := AGroupName;
-    FMsgr.DisplayAlert := ADisplayAlert;
+    FMsgr.Port := LPort;
+    FMsgr.UserName := LUserName;
+    FMsgr.GroupName := LGroupName;
+    FMsgr.DisplayAlert := LDisplayAlert;
     WriteIni;
     FUpdateIPMessenger := True;
-    if AOnline then
+    if LOnline then
       FMsgr.Open;
     Result := True;
   end;
@@ -802,14 +814,5 @@ begin
       end;
   end;
 end;
-
-initialization
-
-FFont := TFont.Create;
-
-finalization
-
-if Assigned(FFont) then
-  FreeAndNil(FFont);
 
 end.

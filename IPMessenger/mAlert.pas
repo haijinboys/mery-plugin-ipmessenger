@@ -39,8 +39,6 @@ type
 
 var
   AlertForm: TAlertForm;
-  FFontName: string;
-  FFontSize: NativeInt;
 
 implementation
 
@@ -58,19 +56,7 @@ uses
 
 procedure TAlertForm.FormCreate(Sender: TObject);
 begin
-  if Win32MajorVersion < 6 then
-    with Font do
-    begin
-      Name := 'Tahoma';
-      Size := 8;
-    end;
   ReadIni;
-  with Font do
-  begin
-    ChangeScale(FFontSize, Size);
-    Name := FFontName;
-    Size := FFontSize;
-  end;
 end;
 
 procedure TAlertForm.FormDestroy(Sender: TObject);
@@ -88,7 +74,7 @@ const
   Step = 40;
   FadeTime = 2000;
 var
-  I, Len: NativeInt;
+  I, Len: Integer;
   Start: DWORD;
 begin
   AlphaBlendValue := 255;
@@ -169,8 +155,14 @@ begin
     Exit;
   with TMemIniFile.Create(S, TEncoding.UTF8) do
     try
-      FFontName := ReadString('MainForm', 'FontName', Font.Name);
-      FFontSize := ReadInteger('MainForm', 'FontSize', Font.Size);
+      with TScaledForm.DefaultFont do
+        if ValueExists('MainForm', 'FontName') then
+        begin
+          Name := ReadString('MainForm', 'FontName', Name);
+          Size := ReadInteger('MainForm', 'FontSize', Size);
+        end
+        else if CheckWin32Version(6, 2) then
+          Assign(Screen.IconFont);
     finally
       Free;
     end;
@@ -181,9 +173,8 @@ const
   Step = 40;
   FadeTime = 2000;
 var
-  I: NativeInt;
+  I, Len: Integer;
   Start: DWORD;
-  Len: NativeInt;
   TaskBarHandle: HWND;
   TaskBarRect, DesktopRect: TRect;
 begin
@@ -232,7 +223,7 @@ begin
     AlphaBlendValue := Trunc(I * (255 / Step));
     Application.ProcessMessages;
     Len := Trunc(Start + I * (FadeTime / Step) - GetTickCount);
-    if (Len > 0) then
+    if Len > 0 then
       Sleep(Len);
   end;
   AlphaBlendValue := 255;
