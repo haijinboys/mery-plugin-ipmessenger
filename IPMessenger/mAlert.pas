@@ -6,16 +6,20 @@ uses
 {$IF CompilerVersion > 22.9}
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants,
   System.Classes, Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs,
-  Vcl.Menus, Vcl.StdCtrls, Vcl.ExtCtrls, Vcl.Buttons,
+  Vcl.Menus, Vcl.Imaging.pngimage, Vcl.StdCtrls, Vcl.ExtCtrls, Vcl.Buttons,
 {$ELSE}
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, Menus, StdCtrls, ExtCtrls, Buttons,
+  Dialogs, Menus, pngimage, StdCtrls, ExtCtrls, Buttons,
 {$IFEND}
   MeryCtrls, mMsgClass, mPerMonitorDpi;
 
 type
   TAlertForm = class(TScaledForm)
     AlertImage: TImage;
+    SmallImage: TImage;
+    MediumImage: TImage;
+    LargeImage: TImage;
+    ExtraLargeImage: TImage;
     AlertLabel: TLabel;
     CloseButton: TCloseButton;
     AlertTimer: TTimer;
@@ -31,6 +35,7 @@ type
     { Private éŒ¾ }
     FMsgItem: TMsgItem;
     procedure ReadIni;
+    procedure UpdateImage;
   public
     { Public éŒ¾ }
     procedure Alert;
@@ -168,6 +173,22 @@ begin
     end;
 end;
 
+procedure TAlertForm.UpdateImage;
+var
+  LImage: TImage;
+begin
+  inherited;
+  if PixelsPerInch >= 288 then
+    LImage := ExtraLargeImage
+  else if PixelsPerInch >= 192 then
+    LImage := LargeImage
+  else if PixelsPerInch >= 144 then
+    LImage := MediumImage
+  else
+    LImage := SmallImage;
+  AlertImage.Picture.Assign(LImage.Picture);
+end;
+
 procedure TAlertForm.Alert;
 const
   Step = 40;
@@ -183,6 +204,11 @@ begin
   DeskTopRect.Right := GetSystemMetrics(SM_CXSCREEN);
   DeskTopRect.Bottom := GetSystemMetrics(SM_CYSCREEN);
   TaskBarHandle := FindWindowEx(0, 0, 'Shell_TrayWnd', nil);
+  AlphaBlendValue := 0;
+  AlphaBlend := True;
+  Hide;
+  Show;
+  UpdateImage;
   if TaskBarHandle <> 0 then
   begin
     GetWindowRect(TaskBarHandle, TaskBarRect);
@@ -212,10 +238,6 @@ begin
     Left := DeskTopRect.Right - Self.Width - 40;
     Top := DeskTopRect.Bottom - Self.Height - 40;
   end;
-  AlphaBlendValue := 0;
-  AlphaBlend := True;
-  Hide;
-  Show;
   SetWindowPos(Handle, HWND_TOPMOST, 0, 0, 0, 0, SWP_SHOWWINDOW or SWP_NOMOVE or SWP_NOSIZE or SWP_NOACTIVATE);
   Start := GetTickCount;
   for I := 0 to Step do

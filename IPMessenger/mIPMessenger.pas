@@ -20,7 +20,7 @@ uses
 
 resourcestring
   SName = 'IPメッセンジャー';
-  SVersion = '2.3.1';
+  SVersion = '2.3.3';
 
 type
   TIPMessengerFrame = class(TFrame)

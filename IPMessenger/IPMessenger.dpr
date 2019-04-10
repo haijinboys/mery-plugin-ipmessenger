@@ -12,6 +12,7 @@ library IPMessenger;
 {$WEAKLINKRTTI ON}
 
 {$R 'mPlugin.res' 'mPlugin.rc'}
+{$R *.dres}
 
 
 uses
@@ -82,7 +83,7 @@ var
 begin
   if (nEvent and EVENT_CREATE) <> 0 then
   begin
-    FApplication := HiWord(lParam);
+    FApplication := hwnd;
     FList := TFrameList.Create;
     FMsgr := TMsgr.Create;
     FMsgr.List := FList;

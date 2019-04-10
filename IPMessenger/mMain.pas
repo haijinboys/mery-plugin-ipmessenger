@@ -688,25 +688,19 @@ begin
 end;
 
 procedure TMainForm.UpdateListView;
+var
+  LList: TImageList;
 begin
-  with HostListView do
-    if PixelsPerInch >= 240 then
-      StateImages := ExtraLargeImageList
-    else if PixelsPerInch >= 192 then
-      StateImages := LargeImageList
-    else if PixelsPerInch >= 144 then
-      StateImages := MediumImageList
-    else
-      StateImages := SmallImageList;
-  with InBoxListView do
-    if PixelsPerInch >= 240 then
-      StateImages := ExtraLargeImageList
-    else if PixelsPerInch >= 192 then
-      StateImages := LargeImageList
-    else if PixelsPerInch >= 144 then
-      StateImages := MediumImageList
-    else
-      StateImages := SmallImageList;
+  if PixelsPerInch >= 288 then
+    LList := ExtraLargeImageList
+  else if PixelsPerInch >= 192 then
+    LList := LargeImageList
+  else if PixelsPerInch >= 144 then
+    LList := MediumImageList
+  else
+    LList := SmallImageList;
+  HostListView.StateImages := LList;
+  InBoxListView.StateImages := LList;
 end;
 
 procedure TMainForm.IPMessengerAll;

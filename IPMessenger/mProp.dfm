@@ -98,6 +98,7 @@ object PropForm: TPropForm
     MaxLength = 5
     MaxValue = 65535
     MinValue = 1024
+    NumbersOnly = True
     TabOrder = 1
     Value = 1024
   end
